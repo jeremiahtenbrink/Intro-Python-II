@@ -1,26 +1,27 @@
 from room import Room
 from player import Player
+from item import Item
+
 # Declare all the rooms
 
 room = {
-    'outside':  Room("Outside Cave Entrance",
-                     "North of you, the cave mount beckons"),
+    'outside': Room("Outside Cave Entrance",
+                    "North of you, the cave mount beckons"),
 
-    'foyer':    Room("Foyer", """Dim light filters in from the south. Dusty
+    'foyer': Room("Foyer", """Dim light filters in from the south. Dusty
 passages run north and east."""),
 
     'overlook': Room("Grand Overlook", """A steep cliff appears before you, falling
 into the darkness. Ahead to the north, a light flickers in
 the distance, but there is no way across the chasm."""),
 
-    'narrow':   Room("Narrow Passage", """The narrow passage bends here from west
+    'narrow': Room("Narrow Passage", """The narrow passage bends here from west
 to north. The smell of gold permeates the air."""),
 
     'treasure': Room("Treasure Chamber", """You've found the long-lost treasure
 chamber! Sadly, it has already been completely emptied by
 earlier adventurers. The only exit is to the south."""),
 }
-
 
 # Link rooms together
 
@@ -37,10 +38,16 @@ room['treasure'].s_to = room['narrow']
 # Main
 #
 
+#
+# Make objects and add them to rooms.
+#
+
+room['foyer'].add_item(Item("sword", "Shinny with sharp edges."))
+room['treasure'].add_item(Item("ladder", 'Long sturdy ladder.'))
+
 # Make a new player object that is currently in the 'outside' room.
 
 player = Player(room['outside'])
-print(player)
 
 # Write a loop that:
 #
@@ -54,21 +61,44 @@ print(player)
 # If the user enters "q", quit the game.
 
 print("You have options: e, s, w, and n for game input. Enter q to quite.")
+print("You may also say get, take or drop \"item name\"")
 
 game = True
 while game:
-    print(f"Current room: {player.get_room().name}")
-    print(f" Description: {player.get_room().description}")
+    print(player)
     userInput = input("What would you like to do?")
-    directions = userInput + "_to"
+    inputSplit = userInput.split(' ')
 
-    if hasattr(player.current_room, directions):
-        newRoom = getattr(player.current_room, directions)
-        player.change_room(newRoom)
+    if len(inputSplit) > 1:
+        action = inputSplit[0]
+        item = inputSplit[1]
+
+        if action == "get" or action == "take":
+            item = player.get_room().grab_item(item)
+            player.add_item(item)
+            print("\n")
+            print(f"You picked up {item.name}")
+        elif action == "drop":
+            droppedItem = player.drop_item(item)
+            if droppedItem is not None:
+                player.current_room.add_item(droppedItem)
+                print("\n")
+                print(f"You have dropped {droppedItem.name}")
+            else:
+                print(f"You do not have a {item}")
     else:
-        print("You can go that direction currently. Please choose another "
-              "option.")
+        directions = userInput + "_to"
+        room = getattr(player.current_room, directions, None)
+        if room is not None:
+            player.change_room(room)
+        else:
+            print("\n")
+            print(
+                "You can't go that direction currently. Please choose another "
+                "option.")
 
-    if userInput == "q":
-        game = False
-        print("Thanks for playing.")
+        if userInput == "q":
+            game = False
+            print("Thanks for playing.")
+
+    print("\n\n\n")
