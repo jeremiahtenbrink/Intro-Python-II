@@ -9,8 +9,6 @@ from item import Item
 
 
 class Player:
-    current_room: ''
-    item: []
 
     def __init__(self, current_room: Room):
         self.current_room = current_room

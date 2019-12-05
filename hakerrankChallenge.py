@@ -1,33 +1,32 @@
 def numofPrizes(k, marks):
-    length = len(marks)
-    i = 0
+    # Keep a histogram of all the student scores
+    count = [0] * 101
 
-    while i < length:
-        if marks[i] == 0:
-            marks.remove(marks[i])
-            length = length - 1
-            continue
-        i = i + 1
+    for m in marks:
+        count[m] += 1
 
-    print(marks)
-    marks.sort(reverse = True)
-    number = k
-    if number > len(marks):
-        number = len(marks)
+    # Count of all ranking students
+    ranking_student_count = 0
 
-    if number == 0:
-        return 0
+    # Go down the histogram from 100 to 1
+    # (Students who score 0 are ineligible)
+    for i in range(100, 0, -1):
+        people_with_score = count[i]
 
-    lowest = marks[number - 1]
+        # If some people got this score
+        if people_with_score != 0:
 
-    sub = marks[number:]
+            # Add them to the total count
+            ranking_student_count += people_with_score
 
-    for i in range(len(sub)):
-        if marks[k + i] == lowest:
-            number += 1
-        else:
-            break
-    return number
+            # And that many fewer ranks are now available
+            k -= people_with_score
+
+            # If no ranks left, we're done
+            if k <= 0:
+                break
+
+    return ranking_student_count
 
 
-print(numofPrizes(4, [0, 0, 0, 60, 80, 100]))
+print(numofPrizes(4, [0, 60, 60, 60, 80, 100]))
